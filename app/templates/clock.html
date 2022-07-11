@@ -1,0 +1,40 @@
+{% extends 'base.html'%}
+{% block content %}
+
+<table id="tblClocked" class="table table-striped" align='center' cellspacing=2 cellpadding=5  border=1>
+<caption>Past 10 clock Details.</caption>
+<thead>
+    <tr>
+      <th scope="Id">#</th>
+      <th scope="Week">Week</th>
+      <th scope="start_date">StartDate</th>
+      <th scope="end_date">EndDate</th>
+      <th scope="hours_clocked">HoursClocked</th>
+      <th scope="Status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for clock in clock_data %}
+    <tr>
+      <th scope="row">{{ clock[0] }}</th>
+      <td><a title="Click to edit Week." href="{{url_for('clocktable',ckid=clock[6])}}">{{ clock[1] }}</a></td>
+      <td>{{ clock[2] }}</td>
+      <td>{{ clock[3] }}</td>
+      <td>{{ clock[4] }}</td>
+      <td>{{ clock[5] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+{% block finalscript %}
+ <script>
+var pathname = window.location.pathname.substring(1);;
+const collection = document.getElementsByClassName("nav-link active");
+for (let i = 0; i < collection.length; i++) {
+  collection[i].className = "nav-link"
+}
+const mycurElement = document.getElementById(pathname)
+mycurElement.className = "nav-link active";
+</script>
+{% endblock %}

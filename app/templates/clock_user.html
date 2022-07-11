@@ -1,0 +1,59 @@
+{% extends 'base.html'%}
+{% block tilte %}
+    Clock FAQ
+{% endblock %}
+
+{% block content %}
+<!--Section: FAQ-->
+<section>
+<div class="container">
+  <div class="row">
+    <div class="col-9"><h2 class="mt-4">User Information</h2></div>
+  </div>
+{% for clck_usr in clock_user %}
+  <div class="row">
+    <div class="col-2"><b>Username</b></div>
+    <div class="col-6">{{ clck_usr[0] }}</div>
+  </div>
+  <div class="row">
+    <div class="col-2"><b>EmployeeID</b></div>
+    <div class="col-6">{{ clck_usr[1] }}</div>
+  </div>
+  <div class="row">
+    <div class="col-2"><b>Full Name</b></div>
+    <div class="col-6">{{ clck_usr[2] }}</div>
+  </div>
+ {% endfor %}
+<hr class="my-5">
+    <h2 class="mt-4">Clock Activities</h2>
+    <p>Please find active available clock activities.</p>
+    <div class="row mb-3">
+      <div class="col-2 themed-grid-col"><b>Project</b></div>
+      <div class="col-2 themed-grid-col"><b>Task</b></div>
+      <div class="col-2 themed-grid-col"><b>Activity</b></div>
+      <div class="col-2 themed-grid-col"><b>Start</b></div>
+      <div class="col-2 themed-grid-col"><b>End</b></div>
+    </div>
+    {% for clck_a in clock_act %}
+     <div class="row mb-3">
+      <div class="col-2 themed-grid-col">{{ clck_a[0] }}</div>
+      <div class="col-2 themed-grid-col">{{ clck_a[1] }}</div>
+      <div class="col-2 themed-grid-col">{{ clck_a[2] }}</div>
+      <div class="col-2 themed-grid-col">{{ clck_a[3] }}</div>
+      <div class="col-2 themed-grid-col">{{ clck_a[4] }}</div>
+    </div>
+    {% endfor %}
+</div>
+</section>
+{% endblock %}
+{% block finalscript %}
+ <script>
+var pathname = window.location.pathname.substring(1);;
+const collection = document.getElementsByClassName("nav-link active");
+for (let i = 0; i < collection.length; i++) {
+  collection[i].className = "nav-link"
+}
+const mycurElement = document.getElementById(pathname)
+mycurElement.className = "nav-link active";
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html'%}
+{% block tilte %}
+    Clock Tile
+{% endblock %}
+
+{% block content %}
+  <div class="px-4 py-5 my-5 text-center">
+    <img class="d-block mx-auto mb-4" src="{{url_for('static', filename='clock.jpg')}}" alt="" width="150" height="150">
+    <h1 class="display-5 fw-bold">Did you Clock yet?</h1>
+    <div class="col-lg-6 mx-auto">
+      <p class="lead mb-4">I Promise, the clocked is true and accurate to best of my knowledge.</p>
+    </div>
+  </div>
+
+  <div class="b-example-divider"></div>
+
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-header py-3">
+            <h4 class="my-0 fw-normal">Week</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">0<small class="text-muted fw-light">%</small></h1>
+          <p> This is your Weekly utilization percentage.</p> 
+         </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-header py-3">
+            <h4 class="my-0 fw-normal">Monthly</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">15<small class="text-muted fw-light">%</small></h1>
+            <p> This is your Monthly utilization percentage.</p> 
+         </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm border-primary">
+          <div class="card-header py-3 text-white bg-primary border-primary">
+            <h4 class="my-0 fw-normal">Yearly</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">29<small class="text-muted fw-light">%</small></h1>
+          <p> This is your Yearly utilization percentage.</p>
+          </div>
+        </div>
+      </div>
+    </div>  
+{% endblock %}
+{% block finalscript %}
+ <script>
+var pathname = window.location.pathname.substring(1);;
+const collection = document.getElementsByClassName("nav-link active");
+for (let i = 0; i < collection.length; i++) {
+  collection[i].className = "nav-link"
+}
+const mycurElement = document.getElementById(pathname)
+mycurElement.className = "nav-link active";
+</script>
+{% endblock %} 

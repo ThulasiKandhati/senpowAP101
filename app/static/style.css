@@ -1,0 +1,18 @@
+a:link {
+  color: blue;
+}
+
+/* visited link */
+a:visited {
+  color: gray;
+}
+
+/* mouse over link */
+a:hover {
+  color: yellow;
+}
+
+/* selected link */
+a:active {
+  color: red;
+}

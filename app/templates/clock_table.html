@@ -1,0 +1,106 @@
+{% extends 'base.html'%}
+{% block content %}
+<script src="{{ url_for('static', filename='table_script.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!--  Alert -->
+   <div id="alert-container">
+   </div> 
+ 
+<div id="wrapper">
+
+<dialog id="dialog_alrt">
+  <h3>Exception!</h3>
+  <p id="dialog_msg">There is more than 40 hours!</p>
+   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="alrt_cancel()">Cancel</button>
+   <button type="button" class="btn btn-primary" onclick="alrt_continue()">Continue</button>
+   <hr style="height:2px; width:50%; border-width:0; color:red; background-color:LightBlue">
+   <span> select <mark>Cancel</mark> to correct the execptions. <span>
+</dialog>
+
+<table id="tblClock" class="table table-striped" align='center' cellspacing=2 cellpadding=5  border=1>
+{% for clck in clock %}
+<caption><b>{{ clck[8] }}</b> clock Details.</caption>
+<thead>
+<tr style="background-color: #e3e1e1">
+<th WIDTH="20%">Activity</th>
+<th WIDTH="9%"><div>Monday</div><div>{{ clck[1] }}</div></th>
+<th WIDTH="9%"><div>Tuesday</div><div>{{ clck[2] }}</div></th>
+<th WIDTH="9%"><div>Wednesday</div><div>{{ clck[3] }}</div></th>
+<th WIDTH="9%"><div>Thursday</div><div>{{ clck[4] }}</div></th>
+<th WIDTH="9%"><div>Friday</div><div>{{ clck[5] }}</div></th>
+<th WIDTH="9%"><div>Saturday</div><div>{{ clck[6] }}</div></th>
+<th WIDTH="9%"><div>Sunday</div><div>{{ clck[7] }}</div></th>
+<th WIDTH="22%">Actions</th>
+</tr>
+{% endfor %}
+</thead>
+{% for clck_det in clock_det %}
+<tr id="row{{ clck_det[8] }}">
+<td id="activity{{ clck_det[8] }}">{{ clck_det[9] }}</td>
+<td id="start{{ clck_det[8] }}">{{ clck_det[1] }}</td>
+<td id="start1{{ clck_det[8] }}">{{ clck_det[2] }}</td>
+<td id="start2{{ clck_det[8] }}">{{ clck_det[3] }}</td>
+<td id="start3{{ clck_det[8] }}">{{ clck_det[4] }}</td>
+<td id="start4{{ clck_det[8] }}">{{ clck_det[5] }}</td>
+<td id="start5{{ clck_det[8] }}">{{ clck_det[6] }}</td>
+<td id="end{{ clck_det[8] }}">{{ clck_det[7] }}</td>
+<td>
+<input type="button" id="edit_button{{ clck_det[8] }}" value="Edit" class="btn btn-dark"  onclick="edit_row({{ clck_det[8] }})">
+<input type="button" id="save_button{{ clck_det[8] }}" value="Save" class="btn btn-dark" onclick="save_row({{ clck_det[8] }})" disabled>
+<input type="button" id="delete_button{{ clck_det[8] }}" value="Delete" class="btn btn-dark" onclick="delete_row({{ clck_det[8] }})">
+</td>
+</tr>
+{% endfor %}
+
+<tr>
+<td>
+<select id="new_activity" class="form-select" aria-label="Default select example">
+  <option selected>Select Activity</option>
+  {% for clck_act in clock_act %}
+  <option value={{clck_act[1]}}>{{clck_act[0]}}</option>
+  {% endfor %}
+</select>
+</td>
+<td><input type="number" id="new_start" value=0 min="1" max="8"></td>
+<td><input type="number" id="new_start1" value=0 min="1" max="8"></td>
+<td><input type="number" id="new_start2" value=0 min="1" max="8"></td>
+<td><input type="number" id="new_start3" value=0 min="1" max="8"></td>
+<td><input type="number" id="new_start4" value=0 min="1" max="8"></td>
+<td><input type="number" id="new_start5" value=0 min="1" max="8"></td>
+<td><input type="number" id="new_end" value=0 min="1" max="8"></td>
+<td><input type="button" class="btn btn-dark" onclick="add_row();" value="Add Row"></td>
+</tr>
+
+{% for clck_tot in clock_tot %}
+<tr>
+<th>Total</th>
+<th id="start_tot">{{clck_tot[0]}}</th>
+<th id="start1_tot">{{clck_tot[1]}}</th>
+<th id="start2_tot">{{clck_tot[2]}}</th>
+<th id="start3_tot">{{clck_tot[3]}}</th>
+<th id="start4_tot">{{clck_tot[4]}}</th>
+<th id="start5_tot">{{clck_tot[5]}}</th>
+<th id="end_tot">{{clck_tot[6]}}</th>
+<th id="c_grandtot">{{clck_tot[7]}}</th>
+</tr>
+{% endfor %}
+</table>
+</div>
+<div class="bg-light clearfix" style="text-align: right;">
+    <span>Click <mark>Save</mark> to submit changes. Click <mark>Cancel</mark> to reset changes.</span>    
+    <button type="button" class="btn btn-warning float-right" onclick="save();">Save</button>
+    <button type="button" class="btn btn-primary float-right" onclick="cancel();">Cancel</button>
+</div>
+
+{% endblock %}
+{% block finalscript %}
+ <script>     
+var pathname = window.location.pathname.substring(1);;
+const collection = document.getElementsByClassName("nav-link active");
+for (let i = 0; i < collection.length; i++) {
+  collection[i].className = "nav-link"
+}
+const mycurElement = document.getElementById(pathname)
+mycurElement.className = "nav-link active";
+</script>
+{% endblock %}
