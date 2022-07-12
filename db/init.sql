@@ -1,7 +1,7 @@
 CREATE DATABASE emp;
 use emp;
 
-create table employee( employee_id integer primary key AUTO_INCREMENT, surname varchar(100),given_name varchar(100),location_id integer,start_date date,end_date date,manager_id integer,employee_type varchar(30),applicant_id integer,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+create table employee( employee_id integer primary key AUTO_INCREMENT, surname varchar(100),given_name varchar(100),location_id integer,start_date date,end_date date,manager_id integer,employee_type varchar(30),applicant_id integer,user_name varchar(30),email varchar(30),create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 ALTER TABLE employee AUTO_INCREMENT=1000;
 
 create table employee_identity(employee_id integer, PAN VARCHAR(30),ADHAR VARCHAR(30),PASSPORT VARCHAR(30),DOB DATE,GENDER VARCHAR(1),create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
@@ -18,11 +18,11 @@ create table employee_jobs(job_id integer primary key AUTO_INCREMENT,NAME VARCHA
 create table employee_assignments(assignment_id integer primary key AUTO_INCREMENT,employee_id integer, position_id integer,job_id integer, supervisor_id integer,department_id integer,start_date date,end_date date,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
 
-insert into employee( surname,given_name ,location_id,start_date,end_date,manager_id,employee_type,applicant_id)values ('pathi','Chengalrayulu',1,'2022-01-01',null,2,'PERMANENT',0),
-('LNU','Sandhya',1,'2022-01-01',null,1000,'PERMANENT',0),
-('pathi','Mohan',1,'2022-01-01',null,1000,'PERMANENT',0),
-('kandhati','Thulasi kumar',2,'2022-01-01',null,1000,'TEMPORARY',0),
-('Mallavarapu','Supriya',2,'2022-01-01',null,1003,'TEMPORARY',0);
+insert into employee( surname,given_name ,location_id,start_date,end_date,manager_id,employee_type,applicant_id)values ('pathi','Chengalrayulu',1,'2022-01-01',null,2,'PERMANENT',0,null,'pathi.chengalrayulu@gmail.com'),
+('LNU','Sandhya',1,'2022-01-01',null,1000,'PERMANENT',0,null,'a@gmail.com'),
+('pathi','Mohan',1,'2022-01-01',null,1000,'PERMANENT',0,null,'b@gmail.com'),
+('kandhati','Thulasi kumar',2,'2022-01-01',null,1000,'TEMPORARY',0,null,'kthulasikumar@gmail.com'),
+('Mallavarapu','Supriya',2,'2022-01-01',null,1003,'TEMPORARY',0,null,'g@gmail.com');
 
 insert into locations(location_code,description,address1,PIN,STATE,COUNTRY) Values
 ('HEAD OFFICE','Head office','Rs.no. 208.1a ,surampalli village, Nuzvid Rd, Vijayawada','521212','Andhra Pradesh','India');
@@ -71,7 +71,7 @@ create table clock(clock_id integer primary key AUTO_INCREMENT,week_id varchar(3
 create table clock_details(seq_no integer primary key AUTO_INCREMENT,clock_id integer ,activity_id integer, day1 integer,day2 integer,day3 integer,day4 integer,day5 integer, day6 integer,day7 integer,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
 
-insert into clock_activity(activity_code,activity_desc,start_date ,end_date ,employee_id ,task_id) values ('Main project','primary work','2022-01-01','2023-01-01',1000,1),('Holiday','company declared holiday','2022-01-01','2023-01-01',1000,2),('Sick Leave','Sick leave for less than 2 days','2022-01-01','2023-01-01',1000,3),('Side Project','Secondary assignment','2022-01-01','2023-01-01',1000,4),('NotBill - HR','Non billable hr work','2022-01-01','2023-01-01',1000,5),('NotClocked','Not clocked yet','2022-01-01','2023-01-01',1000,6);
+insert into clock_activity(activity_code,activity_desc,start_date ,end_date ,employee_id ,task_id,billable) values ('Main project','primary work','2022-01-01','2023-01-01',1000,1,'Y'),('Holiday','company declared holiday','2022-01-01','2023-01-01',1000,2,'N'),('Sick Leave','Sick leave for less than 2 days','2022-01-01','2023-01-01',1000,3,'N'),('Side Project','Secondary assignment','2022-01-01','2023-01-01',1000,4,'Y'),('NotBill - HR','Non billable hr work','2022-01-01','2023-01-01',1000,5,'N'),('NotClocked','Not clocked yet','2022-01-01','2023-01-01',1000,6,'N');
 
 
 insert into clock(week_id, employee_id, start_date,start_date_plus1,start_date_plus2 ,start_date_plus3 ,start_date_plus4 ,start_date_plus5,end_date, hours_clocked ,status,submitted_date)values ('wk22_02',1,'2022-01-03','2022-01-04','2022-01-05','2022-01-06','2022-01-07','2022-01-08','2022-01-09',0,'Submitted',CURRENT_DATE),('wk22_03',1,'2022-01-10','2022-01-11','2022-01-12','2022-01-13','2022-01-14','2022-01-15','2022-01-16',0,'Submitted',CURRENT_DATE),('wk22_04',1,'2022-01-17','2022-01-18','2022-01-19','2022-01-20','2022-01-21','2022-01-22','2022-01-23',0,'Submitted',CURRENT_DATE);
