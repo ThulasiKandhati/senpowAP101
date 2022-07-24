@@ -18,6 +18,25 @@ def home():
 def home1():
     return "timesheet.html"
 
+
+@app.route("/login")
+def login():
+    return render_template("ap101_login.html")
+
+@app.route("/resetpwd", methods=['GET','POST'])
+def resetpwd():
+    app.logger.info('in resetpwd app.py')
+    app.logger.info(request.method)
+    s_nxt_msg = ''
+    e_nxt_msg = ''
+    #<div class="alert alert-primary">Please submmit with <strong>email verification Code</strong> and <strong>Reset password</strong> details.</div>"
+    if request.method == 'GET':
+        s_nxt_msg = "Enter UserName and Submit"
+    if request.method == 'POST':
+        e_nxt_msg = forgot_pwd_nextstep()
+
+    return render_template("ap101_resetpwd.html",s_nxt_msg=s_nxt_msg,e_nxt_msg=e_nxt_msg)
+
 @app.route("/")
 def home2():
     return render_template("clock_land.html")
@@ -92,6 +111,9 @@ def mysql_conn():
         logging.info("Error  in mysql"+ str(e))
         print("exception",e)
 
+
+def forgot_pwd_nextstep():
+    return "Enter Vaild Username and submmit"
    
 
 def query_db():
