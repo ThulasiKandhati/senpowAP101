@@ -18,7 +18,7 @@ create table employee_jobs(job_id integer primary key AUTO_INCREMENT,NAME VARCHA
 create table employee_assignments(assignment_id integer primary key AUTO_INCREMENT,employee_id integer, position_id integer,job_id integer, supervisor_id integer,department_id integer,start_date date,end_date date,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
 
-insert into employee( surname,given_name ,location_id,start_date,end_date,manager_id,employee_type,applicant_id)values ('pathi','Chengalrayulu',1,'2022-01-01',null,2,'PERMANENT',0,null,'pathi.chengalrayulu@gmail.com'),
+insert into employee( surname,given_name ,location_id,start_date,end_date,manager_id,employee_type,applicant_id,user_name,email)values ('pathi','Chengalrayulu',1,'2022-01-01',null,2,'PERMANENT',0,null,'pathi.chengalrayulu@gmail.com'),
 ('LNU','Sandhya',1,'2022-01-01',null,1000,'PERMANENT',0,null,'a@gmail.com'),
 ('pathi','Mohan',1,'2022-01-01',null,1000,'PERMANENT',0,null,'b@gmail.com'),
 ('kandhati','Thulasi kumar',2,'2022-01-01',null,1000,'TEMPORARY',0,null,'kthulasikumar@gmail.com'),
@@ -64,7 +64,7 @@ values(1,99,'Development','2022-05-01','2022-07-30','2022-05-01',null,100),
 CREATE DATABASE clk;
 use clk;
 
-create table clock_activity( activity_id integer primary key AUTO_INCREMENT, activity_code varchar(30),activity_desc varchar(150),start_date date,end_date date,employee_id integer,task_id integer,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+create table clock_activity( activity_id integer primary key AUTO_INCREMENT, activity_code varchar(30),activity_desc varchar(150),start_date date,end_date date,employee_id integer,task_id integer,billable varchar(1),create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
 create table clock(clock_id integer primary key AUTO_INCREMENT,week_id varchar(30), employee_id integer, start_date date,start_date_plus1 date,start_date_plus2 date,start_date_plus3 date,start_date_plus4 date,start_date_plus5 date,end_date date,hours_clocked integer,status varchar(30), submitted_date DATE,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
