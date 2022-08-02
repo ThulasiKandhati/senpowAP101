@@ -35,7 +35,7 @@
                                 <div class="input-group mb-3" >
                                     <span class="input-group-text bg-primary"><i
                                             class="bi bi-person-fill text-white"></i></span>
-                                    <input name="username" type="text" class="form-control" placeholder="Username" value="{{ request.form.get('username','') }}"/>
+                                    <input  id="username" name="username" type="text" class="form-control" placeholder="Username" value="{{ request.form.get('username','') }}"/>
                                 </div>
                                 </div>
                                    <div class="dropdown-divider"></div>
@@ -43,18 +43,18 @@
                                    <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary"><i
                                             class="bi bi-check-square-fill text-white"></i></span>
-                                    <input type="Code" class="form-control" placeholder="Email Verification Code">
+                                    <input id="ecode" name="ecode" type="Code" class="form-control" placeholder="Email Verification Code" value="{{ request.form.get('ecode','') }}">
                                 </div>
                                  <h10>&nbsp </h10>
                                   <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary"><i
                                             class="bi bi-key-fill text-white"></i></span>
-                                    <input type="password" class="form-control" placeholder="New Password">
+                                    <input id="pwd" name="pwd" type="password" class="form-control" placeholder="New Password" value="{{ request.form.get('pwd','') }}">
                                 </div>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary"><i
                                             class="bi bi-key-fill text-white"></i></span>
-                                    <input type="password" class="form-control" placeholder="Retype Password">
+                                    <input id="repwd" name="repwd" type="password" class="form-control" placeholder="Retype Password" value="{{ request.form.get('repwd','') }}">
                                 </div>
                                <div class="row">
                                  <div class="col-md-4">
@@ -81,7 +81,7 @@
         console.log('p_msg:'+p_msg)
         console.log('e_msg:'+e_msg)
         if (p_msg != null && p_msg != '') {
-            a = '<div class="alert alert-primary">'+ p_msg + '</div>'
+            a = '<div align="center" class="alert alert-primary">'+ p_msg + '</div>'
             element.insertAdjacentHTML('beforeend', a);
          }
         if (e_msg != null &&  e_msg != '') {
@@ -92,6 +92,52 @@
             a = '<div class="alert alert-success">'+ s_msg + '</div>'
             element.insertAdjacentHTML('beforeend', a);
          }
+        if ((e_msg == null ||  e_msg == '') && (document.getElementById("username").value) != '') {
+           console.log('case1')
+           disable_user();
+         }
+        console.log((document.getElementById("username").value))
+        console.log({{ request.form.get('username','') }})
+        if ((e_msg == null ||  e_msg == '') && (document.getElementById("username").value) == '') {
+           console.log('case2')
+           enable_user();
+         }
+     if ((e_msg != null ||  e_msg != '') && (document.getElementById("username").value) != '' && (document.getElementById("ecode").value) == '')
+        {
+        console.log('case3')
+        disable_user();
+         }
+     if ((s_msg != null ||  s_msg != '') && (document.getElementById("username").value) != '' && (document.getElementById("ecode").value) != '')
+         {
+        console.log('case4')
+          document.getElementById("username").readOnly = true;
+          document.getElementById("ecode").readOnly = true;
+          document.getElementById("pwd").readOnly = true;
+          document.getElementById("repwd").readOnly = true;
+         }
+      if (document.getElementById("username").readOnly == false && (document.getElementById("username").value) == '')
+         {
+           alert_cal("Username can't be blank!")
+         }
+        function enable_user()
+       {
+          document.getElementById("username").readOnly = false;
+          document.getElementById("ecode").readOnly = true;
+          document.getElementById("pwd").readOnly = true;
+          document.getElementById("repwd").readOnly = true;
+       }
+       function disable_user()
+       {
+          document.getElementById("username").readOnly = true;
+          document.getElementById("ecode").readOnly = false;
+          document.getElementById("pwd").readOnly = false;
+          document.getElementById("repwd").readOnly = false;
+       }
+       function alert_cal(msg)
+      {
+        alert(msg);
+        return false;
+      }
         </script>
 </form>
 </body>

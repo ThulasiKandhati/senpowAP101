@@ -10,20 +10,18 @@
   <div class="row">
     <div class="col-9"><h2 class="mt-4">User Information</h2></div>
   </div>
-{% for clck_usr in clock_user %}
   <div class="row">
     <div class="col-2"><b>Username</b></div>
-    <div class="col-6">{{ clck_usr[0] }}</div>
-  </div>
-  <div class="row">
-    <div class="col-2"><b>EmployeeID</b></div>
-    <div class="col-6">{{ clck_usr[1] }}</div>
+    <div class="col-6">{{ g.user.username }}</div>
   </div>
   <div class="row">
     <div class="col-2"><b>Full Name</b></div>
-    <div class="col-6">{{ clck_usr[2] }}</div>
+    <div class="col-6">{{ g.user.fullname }}</div>
   </div>
- {% endfor %}
+  <div class="row">
+    <div class="col-2"><b>Email</b></div>
+    <div class="col-6">{{ g.user.email }}</div>
+  </div>
 <hr class="my-5">
     <h2 class="mt-4">Clock Activities</h2>
     <p>Please find active available clock activities.</p>

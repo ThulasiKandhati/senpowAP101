@@ -1,27 +1,72 @@
-from flask import Flask,render_template,request,session
+from flask import Flask,render_template,render_template_string,request,session, redirect, g, url_for
 import mysql.connector
 import logging
 import sys
+#import cognitoConnect
+from functools import wraps
 
 app = Flask(__name__)
 
 logging.basicConfig(level=logging.DEBUG)
 app.secret_key = 'SENPOW_CLOCK_AP101'
 
+
+class User:
+    def __init__(self, username, fullname, email):
+        self.username = username
+        self.fullname = fullname
+        self.email = email
+    def __repr__(self):
+        return f'<User: {self.username}>'
+
+
+@app.before_request
+def before_request():
+    g.user = None
+
+    if 'username' in session:
+        user = User(username=session['username'], fullname=session['fullname'], email=session['email']) 
+        g.user = user
+
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'username' in session:
+            return f(*args, **kwargs)
+        else:
+            app.logger.info("You need to login first")
+            return render_template_string(""" 
+            <p>Login Required.<a href="{{ url_for('login') }}"><em>Sign in</em></a> to access clock.</p>
+            """)
+            #return redirect(url_for('login'))
+    return wrap
+
+
 @app.route("/userinfo")
 def home():
-    clock_user = query_emp_db(1000)
-    clock_act = query_emp_act_db(1000)
-    return render_template("clock_user.html",clock_user=clock_user,clock_act=clock_act)
+    clock_act = query_emp_act_db(g.user.employeeid)
+    return render_template("clock_user.html",clock_act=clock_act)
 
 @app.route("/user")
 def home1():
     return "timesheet.html"
 
 
-@app.route("/login")
+
+@app.route("/login", methods=['GET','POST'])
 def login():
-    return render_template("ap101_login.html")
+    e_nxt_msg = ''
+    if request.method == 'POST':
+        uname = request.form.get('username', '')
+        pwd = request.form.get('password', '')
+        app.logger.info(uname)
+        app.logger.info(pwd)
+        e_nxt_msg = valid_login(uname)
+        if not e_nxt_msg:
+            return redirect(url_for('clockland'))
+    return render_template("ap101_login.html",e_nxt_msg=e_nxt_msg)
+
 
 @app.route("/resetpwd", methods=['GET','POST'])
 def resetpwd():
@@ -33,20 +78,20 @@ def resetpwd():
     if request.method == 'GET':
         s_nxt_msg = "Enter UserName and Submit"
     if request.method == 'POST':
-        e_nxt_msg = forgot_pwd_nextstep()
+        s_nxt_msg = forgot_pwd_nextstep()
 
     return render_template("ap101_resetpwd.html",s_nxt_msg=s_nxt_msg,e_nxt_msg=e_nxt_msg)
 
-@app.route("/")
-def home2():
-    return render_template("clock_land.html")
 
-@app.route("/clockland")
+@app.route("/")
+@app.route("/clockland",methods=['GET', 'POST'])
+@login_required
 def clockland():
     return render_template("clock_land.html")
 
 
 @app.route("/clock")
+@login_required
 def clock():
     clock_data = query_db()
     print('Quering DB', file=sys.stdout)
@@ -54,6 +99,7 @@ def clock():
 
 
 @app.route("/clocktable",  methods=['GET','POST'])
+@login_required
 def clocktable():
     query_dict = request.args.to_dict()
     app.logger.info(query_dict)
@@ -80,7 +126,9 @@ def clockfaq():
     return render_template("clock_faq.html")
 
 @app.route("/clockthanks")
+@login_required
 def clockthanks():
+    session.clear()
     return render_template("thanks.html")
 
 
@@ -112,6 +160,23 @@ def mysql_conn():
         print("exception",e)
 
 
+def valid_login(uname):
+    conn,c = mysql_conn()
+    logging.info("Hello in login")
+    c.execute(f"""select user_name, concat(surname,' , ',given_name) fullname,email,employee_id from emp.employee where user_name = {uname}""")
+    user_det = c.fetchall() 
+    c.close()
+    conn.close()
+    app.logger.info(user_det)   
+    if len(user_det):
+        session['username'] = user_det[0][0]
+        session['fullname'] = user_det[0][1]
+        session['email'] = user_det[0][2]
+        session['employeeid'] = user_det[0][3]
+    else:
+        return "Invalid Username or Password."
+
+
 def forgot_pwd_nextstep():
     return "Enter Vaild Username and submmit"
    
@@ -126,15 +191,6 @@ def query_db():
     conn.close()
     return clock_det
 
-def query_emp_db(empid):
-    conn,c = mysql_conn()
-    logging.info("Hello in employee user db")
-    c.execute(f"""select employee_id,CONCAT(SURNAME,GIVEN_NAME) Name from emp.employee where employee_id ={empid}""")
-    clock_user = c.fetchall()
-    app.logger.info(clock_user)
-    c.close()
-    conn.close()
-    return clock_user
 
 
 def query_emp_act_db(empid):
