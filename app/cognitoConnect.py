@@ -3,23 +3,43 @@ import boto3
 from dotenv import load_dotenv
 load_dotenv()
 
-username = 'cliuser8'
-password = 'Cliuser@1'
-
-client = boto3.client('cognito-idp', region_name='ap-south-1')
 
 def sign_up(uname, pwd):
-    response = client.sign_up(
-        ClientId=os.getenv('COGNITO_USER_CLIENT_ID'),
-        Username=username,
-        Password=password,
-        UserAttributes=[{'Name': 'email','Value': 'kthulasikumar@gmail.com'},{'Name': 'email_verified','Value': 'true'}]
-    )
+    try:
+        ret_val = ['E','E','E','']
+        response = client.sign_up(
+            ClientId='2kn21825ivmts1vdd0cshf6h2g',
+            Username=username,
+            Password=password,
+            UserAttributes=[{'Name': 'email','Value': 'kthulasikumar@gmail.com'}]
+        )
+        if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            ret_val[0] = 'Y'
+        print(response)
 
-    print(response)
+        response = client.admin_confirm_sign_up(
+                     UserPoolId='ap-south-1_3fjfOpUAM',
+                     Username=username)
+        print(response)
+        if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            ret_val[1] = 'Y'
+        response = client.admin_update_user_attributes(
+           UserPoolId='ap-south-1_3fjfOpUAM',
+           Username=username,
+           UserAttributes=[
+             {
+                'Name': 'email_verified',
+                'Value': 'true'
+             },
+           ]
+        )
+        print(response)
+        if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            ret_val[2] = 'Y'
 
-    response = client.admin_confirm_sign_up(
-                UserPoolId=os.getenv('COGNITO_USERPOOL_NAME'),
-                Username=username)
-    print(response)
-
+    except Exception as e:
+        print(str(e)[:150])
+        if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            ret_val[3] = str(e)[:150]
+    finally:
+      return ret_val

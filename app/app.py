@@ -83,6 +83,12 @@ def resetpwd():
     return render_template("ap101_resetpwd.html",s_nxt_msg=s_nxt_msg,e_nxt_msg=e_nxt_msg)
 
 
+
+@app.route("/signup", methods=['GET'])
+def signup():
+    app.logger.info('in signup app.py')
+    return render_template("ap101_usercognito.html")
+
 @app.route("/")
 @app.route("/clockland",methods=['GET', 'POST'])
 @login_required
