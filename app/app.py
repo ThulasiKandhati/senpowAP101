@@ -98,6 +98,7 @@ def signup():
             cognitoConnect.reset_pas(uname);
         if request.form.get('submit_button') == "Reset Password":
             app.logger.info("Reset Password")
+            cognitoConnect.reset_pass(uname)
     if uname:
         sign_dat = signup_query(uname)
     return render_template("ap101_usercognito.html",sign_dat=sign_dat)
