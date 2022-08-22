@@ -1,7 +1,7 @@
 CREATE DATABASE emp;
 use emp;
 
-create table employee( employee_id integer primary key AUTO_INCREMENT, surname varchar(100),given_name varchar(100),location_id integer,start_date date,end_date date,manager_id integer,employee_type varchar(30),applicant_id integer,user_name varchar(30),email varchar(30),create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+create table employee( employee_id integer primary key AUTO_INCREMENT, surname varchar(100),given_name varchar(100),location_id integer,start_date date,end_date date,manager_id integer,employee_type varchar(30),applicant_id integer,user_name varchar(5),email varchar(30),cognito_user varchar(1) DEFAULT 'N',user_confirmed varchar(1) DEFAULT 'N',email_confirmed varchar(1) DEFAULT 'N',cognito_msg varchar(250) DEFAULT NULL,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 ALTER TABLE employee AUTO_INCREMENT=1000;
 
 create table employee_identity(employee_id integer, PAN VARCHAR(30),ADHAR VARCHAR(30),PASSPORT VARCHAR(30),DOB DATE,GENDER VARCHAR(1),create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
@@ -17,12 +17,17 @@ create table employee_jobs(job_id integer primary key AUTO_INCREMENT,NAME VARCHA
 
 create table employee_assignments(assignment_id integer primary key AUTO_INCREMENT,employee_id integer, position_id integer,job_id integer, supervisor_id integer,department_id integer,start_date date,end_date date,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
+create table emp_app_roles(user_name varchar(5),role_name varchar(15),start_date date,end_date date,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
 insert into employee( surname,given_name ,location_id,start_date,end_date,manager_id,employee_type,applicant_id,user_name,email)values ('pathi','Chengalrayulu',1,'2022-01-01',null,2,'PERMANENT',0,null,'pathi.chengalrayulu@gmail.com'),
 ('LNU','Sandhya',1,'2022-01-01',null,1000,'PERMANENT',0,null,'a@gmail.com'),
 ('pathi','Mohan',1,'2022-01-01',null,1000,'PERMANENT',0,null,'b@gmail.com'),
 ('kandhati','Thulasi kumar',2,'2022-01-01',null,1000,'TEMPORARY',0,null,'kthulasikumar@gmail.com'),
 ('Mallavarapu','Supriya',2,'2022-01-01',null,1003,'TEMPORARY',0,null,'g@gmail.com');
+
+insert into employee( surname,given_name ,location_id,start_date,end_date,manager_id,employee_type,applicant_id,user_name,email,cognito_user,user_confirmed, email_confirmed,cognito_msg) values
+('kandhati','Hemsagar',1,'2022-06-01',null,1002,'TEMPORARY',0,null,'kthulasikumar@gmail.com','Y','Y','Y','User sysnced with cognito');
+
 
 insert into locations(location_code,description,address1,PIN,STATE,COUNTRY) Values
 ('HEAD OFFICE','Head office','Rs.no. 208.1a ,surampalli village, Nuzvid Rd, Vijayawada','521212','Andhra Pradesh','India');
@@ -40,6 +45,24 @@ insert into employee_jobs(NAME,description,Location_id) Values
 ('Manager','Manager',1),
 ('consultant','Consultant',2),
 ('Supervisor','Supervisor lead',1);
+
+
+insert into emp_app_roles(user_name,role_name,start_date,end_date) values
+('A1000','AP101_ADMIN','2022-01-01',null);
+insert into emp_app_roles(user_name,role_name,start_date,end_date) values
+('A1001','AP101_USER','2022-01-01',null);
+insert into emp_app_roles(user_name,role_name,start_date,end_date) values
+('A1002','AP101_USER','2022-01-01',null);
+insert into emp_app_roles(user_name,role_name,start_date,end_date) values
+('A1003','AP101_USER','2022-01-01',null);
+insert into emp_app_roles(user_name,role_name,start_date,end_date) values
+('A1004','AP101_USER','2022-01-01',null);
+
+
+UPDATE employee 
+set user_name = concat('A',employee_id)
+where user_name is null;
+
 
 CREATE DATABASE prj;
 use prj;

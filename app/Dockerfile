@@ -20,10 +20,16 @@ RUN mkdir -m755 templates \
 COPY ./templates/* /home/senpow/templates/
 COPY ./static/* /home/senpow/static/
 
-COPY app.py /tmp
+COPY app.py /tmp 
+COPY cognitoConnect.py /tmp
+COPY .env /tmp
 
 RUN cp /tmp/app.py /home/senpow \
      && chmod +x app.py \
+     && cp /tmp/.env /home/senpow \
+     && chmod +x .env \
+     && cp /tmp/cognitoConnect.py /home/senpow \
+     && chmod +x cognitoConnect.py \
      && pwd \
      && ls \
      && ls ./templates \

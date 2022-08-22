@@ -69,10 +69,10 @@ def sign_up(uname, c_msg, check0, check1, check2, check3, check4):
             response = client.admin_confirm_sign_up(
                          UserPoolId=os.getenv('COGNITO_USERPOOL_NAME'),
                          Username=username)
-                print(response)
-                if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-                    ret_val[1] = 'Y'
-                    ret_msg += ' User Confrimed.'
+            print(response)
+            if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+                ret_val[1] = 'Y'
+                ret_msg += ' User Confrimed.'
         if not check2:
             response = client.admin_update_user_attributes(
                  UserPoolId=os.getenv('COGNITO_USERPOOL_NAME'),
@@ -107,8 +107,8 @@ def sign_up(uname, c_msg, check0, check1, check2, check3, check4):
             print(response)
             if response['ResponseMetadata']['HTTPStatusCode'] == 200:
                 ret_msg += ' AP101_ADMIN added.'
-    send_plain_email("Senthur Power App user Created",f"User Name: {username} and password: {password}") 
-    return ret_val, ret_msg
+        send_plain_email("Senthur Power App user Created",f"User Name: {username} and password: {password}") 
+        return ret_val, ret_msg
     except Exception as e:
         print(str(e)[:150])
         ret_msg += str(e)[:150]

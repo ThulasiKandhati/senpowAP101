@@ -16,7 +16,6 @@
   </div>
 
   <div class="b-example-divider"></div>
-<script src="{{ url_for('static', filename='login.js') }}"></script>
 <style> .checkbox-wrapper {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -25,7 +24,8 @@
     </head>
 
     <body>
-<form action="{{ url_for("resetpwd")}}" method="post">
+<script src="{{ url_for('static', filename='signup.js') }}"></script>
+<form action="{{ url_for("signup")}}" method="post">
         <div class="container-fluid vh-100" style="margin-top:10px">
             <div class="" style="margin-top:10px">
                 <div class="rounded d-flex justify-content-center">
@@ -39,61 +39,69 @@
 <div class="row justify-content-center">
 <div class="col-md-5">                            
 <div class="input-group">
-  <input type="search" class="form-control rounded" placeholder="Username" aria-label="Search" aria-describedby="search-addon" />
-  <button type="button" class="btn btn-outline-primary">search</button>
+  <input type="search" id="unameser" name="unameser" class="form-control rounded" placeholder="Username" aria-label="Search" aria-describedby="search-addon" value="{{ request.form.get('unameser','') }}" />
+  <button type="submit" class="btn btn-outline-primary">search</button>
 </div>
 </div>
 </div>
                             </div>
+{% for user_inf in sign_dat %}
                             <div class="p-4">
                                <h4 class="mb-3">User Details</h4>
                                 <div class="input-group" >
                                   <label for="uname" class="col-sm-2 col-form-label">Username</label>
-                                    <input  id="uname" name="uname" type="text" class="form-control" placeholder="Username" value="{{ request.form.get('uname','') }}" readonly/>
+                                    <input  id="uname" name="uname" type="text" class="form-control" placeholder="Username" value="{{ user_inf[0] }}" readonly/>
                                 </div>
                                 <div class="input-group mb-1" >
                                   <label for="fname" class="col-sm-2 col-form-label">Fullname</label>
-                                    <input  id="fname" name="fname" type="text" class="form-control" placeholder="Fullname" value="{{ request.form.get('fname','') }}" readonly/>
+                                    <input  id="fname" name="fname" type="text" class="form-control" placeholder="Fullname" value="{{ user_inf[1] }}" readonly/>
                                 </div>
      <div class="input-group mb-1" >
                                   <label for="uemail" class="col-sm-2 col-form-label">Email</label>
-                                    <input  id="uemail" name="uemail" type="text" class="form-control" placeholder="Email" value="{{ request.form.get('uemail','') }}" readonly/>
+                                    <input  id="uemail" name="uemail" type="text" class="form-control" placeholder="Email" value="{{ user_inf[2] }}" readonly/>
                                 </div>
                                 </div>
                                    <div class="dropdown-divider"></div>
                                    <h10>&nbsp </h10>
 <div class="form-group row">
-  <label for="name" class="col-sm-2 control-label">Clock App</label>
+  <label for="name" class="col-sm-2 control-label">Access Details</label>
   <div class="col-sm-8 checkbox-wrapper">
     <div class="checkbox-inline">
-      <input class="form-check-input" type="checkbox" id="severity_0" name="severity[]" value="1" onclick="return false;"/>
-      <label class="form-check-label" for="severity_0">User Created</label>
+      <input class="form-check-input" type="checkbox" id="check_0" name="check_0" {{ user_inf[4] }} value="1" onclick="return false;"/>
+      <label class="form-check-label" for="severity_0">Cognito User</label>
     </div>
     <div class="checkbox-inline">
-      <input class="form-check-input" type="checkbox" id="severity_2" name="severity[]" value="2" onclick="return false;">
+      <input class="form-check-input" type="checkbox" id="check_1" name="check_1" value="1" {{ user_inf[5] }} onclick="return false;">
       <label class="form-check-label" for="severity_2">User Confrimed</label>
     </div>
     <div class="checkbox-inline">
-      <input class="form-check-input" type="checkbox" id="severity_4" name="severity[]" value="4" onclick="return false;">
+      <input class="form-check-input" type="checkbox" id="check_2" name="check_2" value="2" {{ user_inf[6] }} onclick="return false;">
       <label class="form-check-label" for="severity_4">Email Confrimed</label>
     </div>
     <div class="checkbox-inline">
-      <input class="form-check-input" type="checkbox" id="severity_1" name="severity[]" value="1" onclick="return false;">
-      <label class="form-check-label" for="severity_1">Admin</label>
+      <input class="form-check-input" type="checkbox" id="check_3" name="check_3" value="3" {{ user_inf[7] }} onclick="return false;">
+      <label class="form-check-label" for="severity_4">Clock User</label>
+    </div>
+    <div class="checkbox-inline">
+      <input class="form-check-input" type="checkbox" id="check_4" name="check_4" value="4" {{ user_inf[8] }} onclick="return false;">
+      <label class="form-check-label" for="severity_1">Clock Admin</label>
     </div>
   </div>
-</div>                                   
+</div> 
+     <div class="p-4">
+     <div class="input-group mb-1" >
+     <label for="cmsg" class="col-sm-2 control-label">      </label>
+     <textarea readonly name="cmsg" rows="2" cols="65">{{ user_inf[3] }}</textarea>
+                                </div>
+                                </div>                                  
+{% endfor %}
                                 <h10>&nbsp </h10>
                                <div class="row">
                                  <div class="col-md-4 text-end">
-                                   <button class="btn btn-primary text-center mt-2" type="submit" onclick="submit()">
-                                    Create User
-                                   </button>
+                                   <input name="submit_button" class="btn btn-primary text-center mt-2" value="Create User" type="submit" onclick="create_user()"/>
                                  </div>
                                 <div class="col-md-4 text-end">
-                                <button class="btn btn-primary text-center mt-2" type="submit" onclick="submit()">
-                                    Reset Password
-                                   </button>
+                                <input name="submit_button" class="btn btn-primary text-center mt-2" type="submit" value="Reset Password" onclick="resetpwd()"/>
                                 </div>
                                </div>
                           </div>
