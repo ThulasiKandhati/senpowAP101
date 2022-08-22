@@ -93,9 +93,8 @@ def signup():
         uname = request.form['unameser'];
         if request.form.get('submit_button') ==  "Create User":
             sign_dat = signup_query(uname)
-            cognitoConnect.sign_up(uname, sign_dat[3], sign_dat[4], sign_dat[5], sign_dat[6], sign_dat[7], sign_dat[8])
+            cognitoConnect.sign_up(uname, sign_dat[0][3], sign_dat[0][4], sign_dat[0][5], sign_dat[0][6], sign_dat[0][7], sign_dat[0][8])
             app.logger.info("Create user")
-            cognitoConnect.reset_pas(uname);
         if request.form.get('submit_button') == "Reset Password":
             app.logger.info("Reset Password")
             cognitoConnect.reset_pass(uname)
