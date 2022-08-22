@@ -2,7 +2,7 @@ from flask import Flask,render_template,render_template_string,request,session, 
 import mysql.connector
 import logging
 import sys
-#import cognitoConnect
+import cognitoConnect
 from functools import wraps
 
 app = Flask(__name__)
@@ -84,10 +84,23 @@ def resetpwd():
 
 
 
-@app.route("/signup", methods=['GET'])
+@app.route("/signup", methods=['GET','POST'])
 def signup():
+    sign_dat = '' 
+    uname = ''
     app.logger.info('in signup app.py')
-    return render_template("ap101_usercognito.html")
+    if request.method == 'POST':
+        uname = request.form['unameser'];
+        if request.form.get('submit_button') ==  "Create User":
+            sign_dat = signup_query(uname)
+            cognitoConnect.sign_up(uname, sign_dat[3], sign_dat[4], sign_dat[5], sign_dat[6], sign_dat[7], sign_dat[8])
+            app.logger.info("Create user")
+            cognitoConnect.reset_pas(uname);
+        if request.form.get('submit_button') == "Reset Password":
+            app.logger.info("Reset Password")
+    if uname:
+        sign_dat = signup_query(uname)
+    return render_template("ap101_usercognito.html",sign_dat=sign_dat)
 
 @app.route("/")
 @app.route("/clockland",methods=['GET', 'POST'])
@@ -185,7 +198,44 @@ def valid_login(uname):
 
 def forgot_pwd_nextstep():
     return "Enter Vaild Username and submmit"
-   
+
+
+def signup_query(uname):
+    conn,c = mysql_conn()
+    logging.info("Hello in query_db")
+    c.execute(f"""select uname,full_name,ema,cmg ,cognito_use,user_confirm,email_confirm
+   ,(CASE
+    WHEN clock_user = 1 THEN 'checked'
+    ELSE null
+END) clock_ad1 
+   ,(CASE
+    WHEN clock_admin = 1 THEN 'checked'
+    ELSE null
+END) clock_ad
+from (select e.user_name uname,concat(e.surname,' ',e.given_name) full_name,e.email ema,(CASE
+    WHEN cognito_user = 'Y' THEN 'checked'
+    ELSE null
+END) cognito_use,
+(CASE
+    WHEN user_confirmed = 'Y' THEN 'checked'
+    ELSE null
+END) user_confirm,
+(CASE
+    WHEN email_confirmed = 'Y' THEN 'checked'
+    ELSE null
+END) email_confirm,
+(select count(1) from emp.emp_app_roles r
+where e.user_name =r.user_name and role_name ='AP101_USER') clock_user,
+(select count(1) from emp.emp_app_roles r
+where e.user_name =r.user_name and role_name ='AP101_ADMIN') clock_admin,
+cognito_msg cmg
+from emp.employee e  where user_name = '{uname}') as tt""")
+    clock_det = c.fetchall()
+    app.logger.info(clock_det)
+    c.close()
+    conn.close()
+    return clock_det   
+
 
 def query_db():
     conn,c = mysql_conn()
