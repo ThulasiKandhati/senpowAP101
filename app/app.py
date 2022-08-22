@@ -183,7 +183,7 @@ def mysql_conn():
 def valid_login(uname):
     conn,c = mysql_conn()
     logging.info("Hello in login")
-    c.execute(f"""select user_name, concat(surname,' , ',given_name) fullname,email,employee_id from emp.employee where user_name = {uname}""")
+    c.execute(f"""select user_name, concat(surname,' , ',given_name) fullname,email,employee_id from emp.employee where user_name = '{uname}'""")
     user_det = c.fetchall() 
     c.close()
     conn.close()
