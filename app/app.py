@@ -62,25 +62,26 @@ def login():
         pwd = request.form.get('password', '')
         app.logger.info(uname)
         app.logger.info(pwd)
-        e_nxt_msg = valid_login(uname)
+        e_nxt_msg = valid_login(uname, pwd)
         if not e_nxt_msg:
             return redirect(url_for('clockland'))
     return render_template("ap101_login.html",e_nxt_msg=e_nxt_msg)
 
-
+forgot_msg_dict = {1:"Enter UserName and Submit",2:"Enter Email code and new password",3:"New password emailed" }
 @app.route("/resetpwd", methods=['GET','POST'])
 def resetpwd():
     app.logger.info('in resetpwd app.py')
     app.logger.info(request.method)
-    s_nxt_msg = ''
-    e_nxt_msg = ''
+    s_msg = ''
+    e_msg = ''
+    p_msg = ''
     #<div class="alert alert-primary">Please submmit with <strong>email verification Code</strong> and <strong>Reset password</strong> details.</div>"
     if request.method == 'GET':
-        s_nxt_msg = "Enter UserName and Submit"
+        p_msg = forgot_msg_dict.get(1,'NA')
     if request.method == 'POST':
-        s_nxt_msg = forgot_pwd_nextstep()
+        p_msg, s_msg, e_msg = forgot_pwd_nextstep()
 
-    return render_template("ap101_resetpwd.html",s_nxt_msg=s_nxt_msg,e_nxt_msg=e_nxt_msg)
+    return render_template("ap101_resetpwd.html",p_msg =p_msg , s_msg=s_msg, e_msg=e_msg)
 
 
 
@@ -92,13 +93,17 @@ def signup():
     if request.method == 'POST':
         uname = request.form['unameser'];
         if request.form.get('submit_button') ==  "Create User":
-            sign_dat = signup_query(uname)
-            cognitoConnect.sign_up(uname, sign_dat[0][3], sign_dat[0][4], sign_dat[0][5], sign_dat[0][6], sign_dat[0][7], sign_dat[0][8])
             app.logger.info("Create user")
+            sign_dat = signup_query(uname)
+            checks, check_msg, check_debug = cognitoConnect.sign_up(uname, sign_dat[0][3], sign_dat[0][4], sign_dat[0][5], sign_dat[0][6], sign_dat[0][7], sign_dat[0][8])
+            app.logger.info(f"Debug {check_debug}")
+            app.logger.info(f"updating user {uname}")
+            update_cognito_db(uname,checks,check_msg)
         if request.form.get('submit_button') == "Reset Password":
             app.logger.info("Reset Password")
             cognitoConnect.reset_pass(uname)
     if uname:
+        app.logger.info(f"Fetching the page ap101_usercognito.html")
         sign_dat = signup_query(uname)
     return render_template("ap101_usercognito.html",sign_dat=sign_dat)
 
@@ -179,7 +184,7 @@ def mysql_conn():
         print("exception",e)
 
 
-def valid_login(uname):
+def valid_login(uname, paswd):
     conn,c = mysql_conn()
     logging.info("Hello in login")
     c.execute(f"""select user_name, concat(surname,' , ',given_name) fullname,email,employee_id from emp.employee where user_name = '{uname}'""")
@@ -188,15 +193,33 @@ def valid_login(uname):
     conn.close()
     app.logger.info(user_det)   
     if len(user_det):
+        response = cognitoConnect.sign_in(uname, paswd)
+        app.logger.info(response)
+        if str(response).find("ERR_INVALID_AUTH") != -1:
+            return "Invalid Username Password."
         session['username'] = user_det[0][0]
         session['fullname'] = user_det[0][1]
         session['email'] = user_det[0][2]
         session['employeeid'] = user_det[0][3]
     else:
-        return "Invalid Username or Password."
+        return "Invalid Username."
 
 
-def forgot_pwd_nextstep():
+def forgot_pwd_nextstep(username, ecode):
+    if not ecode:
+        response = cognitoConnect.forgot_password(uname)
+        if str(response).find("ERR_INVALID_FORGPASS") != -1:
+            e_msg = "Invalid User details"
+            p_msg = forgot_msg_dict.get(1)
+        else:
+            p_msg = forgot_msg_dict.get(2)
+    else:
+        response = cognitoConnect.confrim_forgot_password(uname, ecode)
+        if str(response).find("ERR_INVALID_CNFFORGPASS") != -1:
+            e_msg = "Invalid details.Password not set"
+            p_msg = forgot_msg_dict.get(2)
+        else:
+            s_msg = forgot_msg_dict.get(3)
     return "Enter Vaild Username and submmit"
 
 
@@ -236,6 +259,16 @@ from emp.employee e  where user_name = '{uname}') as tt""")
     conn.close()
     return clock_det   
 
+
+def update_cognito_db(uname,checks,check_msg):
+    conn,c = mysql_conn()
+    logging.info("Hello in update_cognito_check_db")
+    logging.info(checks)
+    logging.info(check_msg)
+    c.execute(f""" update emp.employee e set cognito_user ='{checks[0]}' ,user_confirmed='{checks[1]}', email_confirmed ='{checks[2]}', cognito_msg ='{check_msg}'  where user_name = '{uname}'""")
+    conn.commit()
+    c.close()
+    conn.close()
 
 def query_db():
     conn,c = mysql_conn()
@@ -324,6 +357,9 @@ def insert_clock(ckid,clock_data):
         conn.close()
     except Exception as e:
         app.logger.info(e)
+
+
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0',port=5000,debug=True)

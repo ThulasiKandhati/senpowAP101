@@ -35,7 +35,7 @@
                                 <div class="input-group mb-3" >
                                     <span class="input-group-text bg-primary"><i
                                             class="bi bi-person-fill text-white"></i></span>
-                                    <input  id="username" name="username" type="text" class="form-control" placeholder="Username" value="{{ request.form.get('username','') }}"/>
+                                    <input  id="username" name="username" type="text" class="form-control" placeholder="Username" value="{{ request.form.get('username','') }}" required>
                                 </div>
                                 </div>
                                    <div class="dropdown-divider"></div>
@@ -45,20 +45,9 @@
                                             class="bi bi-check-square-fill text-white"></i></span>
                                     <input id="ecode" name="ecode" type="Code" class="form-control" placeholder="Email Verification Code" value="{{ request.form.get('ecode','') }}">
                                 </div>
-                                 <h10>&nbsp </h10>
-                                  <div class="input-group mb-3">
-                                    <span class="input-group-text bg-primary"><i
-                                            class="bi bi-key-fill text-white"></i></span>
-                                    <input id="pwd" name="pwd" type="password" class="form-control" placeholder="New Password" value="{{ request.form.get('pwd','') }}">
-                                </div>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text bg-primary"><i
-                                            class="bi bi-key-fill text-white"></i></span>
-                                    <input id="repwd" name="repwd" type="password" class="form-control" placeholder="Retype Password" value="{{ request.form.get('repwd','') }}">
-                                </div>
                                <div class="row">
                                  <div class="col-md-4">
-                                <button class="btn btn-primary text-center mt-2" type="submit" onclick="submit()">
+                                <button class="btn btn-primary text-center mt-2" name="submitt" type="submit" onclick="submit()">
                                     Submit
                                 </button> 
                                   </div>
@@ -112,26 +101,17 @@
         console.log('case4')
           document.getElementById("username").readOnly = true;
           document.getElementById("ecode").readOnly = true;
-          document.getElementById("pwd").readOnly = true;
-          document.getElementById("repwd").readOnly = true;
-         }
-      if (document.getElementById("username").readOnly == false && (document.getElementById("username").value) == '')
-         {
-           alert_cal("Username can't be blank!")
+	  document.getElementById("submitt").disabled = true;
          }
         function enable_user()
        {
           document.getElementById("username").readOnly = false;
           document.getElementById("ecode").readOnly = true;
-          document.getElementById("pwd").readOnly = true;
-          document.getElementById("repwd").readOnly = true;
        }
        function disable_user()
        {
           document.getElementById("username").readOnly = true;
           document.getElementById("ecode").readOnly = false;
-          document.getElementById("pwd").readOnly = false;
-          document.getElementById("repwd").readOnly = false;
        }
        function alert_cal(msg)
       {

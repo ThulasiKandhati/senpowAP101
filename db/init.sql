@@ -1,7 +1,7 @@
 CREATE DATABASE emp;
 use emp;
 
-create table employee( employee_id integer primary key AUTO_INCREMENT, surname varchar(100),given_name varchar(100),location_id integer,start_date date,end_date date,manager_id integer,employee_type varchar(30),applicant_id integer,user_name varchar(5),email varchar(30),cognito_user varchar(1) DEFAULT 'N',user_confirmed varchar(1) DEFAULT 'N',email_confirmed varchar(1) DEFAULT 'N',cognito_msg varchar(250) DEFAULT NULL,create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+create table employee( employee_id integer primary key AUTO_INCREMENT, surname varchar(100),given_name varchar(100),location_id integer,start_date date,end_date date,manager_id integer,employee_type varchar(30),applicant_id integer,user_name varchar(5),email varchar(30),cognito_user varchar(1) DEFAULT 'N',user_confirmed varchar(1) DEFAULT 'N',email_confirmed varchar(1) DEFAULT 'N',cognito_msg varchar(250) DEFAULT '',create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 ALTER TABLE employee AUTO_INCREMENT=1000;
 
 create table employee_identity(employee_id integer, PAN VARCHAR(30),ADHAR VARCHAR(30),PASSPORT VARCHAR(30),DOB DATE,GENDER VARCHAR(1),create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
