@@ -47,7 +47,7 @@
                                 </div>
                                <div class="row">
                                  <div class="col-md-4">
-                                <button class="btn btn-primary text-center mt-2" name="submitt" type="submit" onclick="submit()">
+                                <button class="btn btn-primary text-center mt-2" name="submitt" id="submitt"  type="submit" onclick="submit()">
                                     Submit
                                 </button> 
                                   </div>
@@ -64,9 +64,9 @@
             </div>
        <script type="text/javascript">
         const element = document.querySelector('#alert1')
-        let p_msg ='{{ p_nxt_msg }}';
-        let s_msg ='{{ s_nxt_msg }}';
-        let e_msg ='{{ e_nxt_msg }}';
+        let p_msg ='{{ p_msg }}';
+        let s_msg ='{{ s_msg }}';
+        let e_msg ='{{ e_msg }}';
         console.log('p_msg:'+p_msg)
         console.log('e_msg:'+e_msg)
         if (p_msg != null && p_msg != '') {
@@ -80,6 +80,13 @@
         if (s_msg != null && s_msg != '') {
             a = '<div class="alert alert-success">'+ s_msg + '</div>'
             element.insertAdjacentHTML('beforeend', a);
+         }
+	     if ((s_msg != null ||  s_msg != '') && (document.getElementById("username").value) != '' && (document.getElementById("ecode").value) != '')
+         {
+        console.log('case4')
+          document.getElementById("username").readOnly = true;
+          document.getElementById("ecode").readOnly = true;
+          document.getElementById("submitt").disabled = true;
          }
         if ((e_msg == null ||  e_msg == '') && (document.getElementById("username").value) != '') {
            console.log('case1')
@@ -95,13 +102,6 @@
         {
         console.log('case3')
         disable_user();
-         }
-     if ((s_msg != null ||  s_msg != '') && (document.getElementById("username").value) != '' && (document.getElementById("ecode").value) != '')
-         {
-        console.log('case4')
-          document.getElementById("username").readOnly = true;
-          document.getElementById("ecode").readOnly = true;
-	  document.getElementById("submitt").disabled = true;
          }
         function enable_user()
        {

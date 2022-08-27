@@ -79,7 +79,9 @@ def resetpwd():
     if request.method == 'GET':
         p_msg = forgot_msg_dict.get(1,'NA')
     if request.method == 'POST':
-        p_msg, s_msg, e_msg = forgot_pwd_nextstep()
+        uname = request.form.get('username', '')
+        ecode  = request.form.get('ecode', '')        
+        p_msg, s_msg, e_msg = forgot_pwd_nextstep(uname, ecode)
 
     return render_template("ap101_resetpwd.html",p_msg =p_msg , s_msg=s_msg, e_msg=e_msg)
 
@@ -205,23 +207,36 @@ def valid_login(uname, paswd):
         return "Invalid Username."
 
 
-def forgot_pwd_nextstep(username, ecode):
-    if not ecode:
-        response = cognitoConnect.forgot_password(uname)
-        if str(response).find("ERR_INVALID_FORGPASS") != -1:
+def forgot_pwd_nextstep(uname, ecode):
+    try:
+        e_msg =  p_msg =  s_msg = ''
+        if not ecode:
+            response = cognitoConnect.forgot_password(uname)
+            app.logger.info(response)
+            if str(response).find("ERR_INVALID_FORGPASS") != -1:
+                e_msg = "Invalid User details"
+                p_msg = forgot_msg_dict.get(1)
+            else:
+                p_msg = forgot_msg_dict.get(2)
+        else:
+            response = cognitoConnect.confirm_forgot_password(uname, ecode)
+            app.logger.info(response)
+            if str(response).find("ERR_INVALID_CNFFORGPASS") != -1:
+                e_msg = "Invalid details.Password not set"
+                p_msg = forgot_msg_dict.get(2)
+            else:
+                s_msg = forgot_msg_dict.get(3)
+    except Exception as e:
+        logging.info("Error  in mysql"+ str(e))
+        if not ecode:
             e_msg = "Invalid User details"
             p_msg = forgot_msg_dict.get(1)
         else:
-            p_msg = forgot_msg_dict.get(2)
-    else:
-        response = cognitoConnect.confrim_forgot_password(uname, ecode)
-        if str(response).find("ERR_INVALID_CNFFORGPASS") != -1:
             e_msg = "Invalid details.Password not set"
             p_msg = forgot_msg_dict.get(2)
-        else:
-            s_msg = forgot_msg_dict.get(3)
-    return "Enter Vaild Username and submmit"
-
+    finally:
+        logging.info(f"p_msg:{p_msg},s_msg:{s_msg},e_msg:{e_msg}")
+        return p_msg, s_msg, e_msg
 
 def signup_query(uname):
     conn,c = mysql_conn()
