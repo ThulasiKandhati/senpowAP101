@@ -4,6 +4,7 @@ import logging
 import sys
 import cognitoConnect
 from functools import wraps
+from datetime import timedelta
 
 app = Flask(__name__)
 
@@ -12,10 +13,11 @@ app.secret_key = 'SENPOW_CLOCK_AP101'
 
 
 class User:
-    def __init__(self, username, fullname, email):
+    def __init__(self, username, fullname, email, employeeid):
         self.username = username
         self.fullname = fullname
         self.email = email
+        self.employeeid = employeeid
     def __repr__(self):
         return f'<User: {self.username}>'
 
@@ -25,8 +27,13 @@ def before_request():
     g.user = None
 
     if 'username' in session:
-        user = User(username=session['username'], fullname=session['fullname'], email=session['email']) 
+        user = User(username=session['username'], fullname=session['fullname'], email=session['email'], employeeid=session['employeeid']) 
         g.user = user
+
+@app.before_first_request  # runs before FIRST request (only once)
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=30)
 
 
 def login_required(f):
@@ -113,13 +120,14 @@ def signup():
 @app.route("/clockland",methods=['GET', 'POST'])
 @login_required
 def clockland():
-    return render_template("clock_land.html")
+    wkpct,yrpct = query_clk_stats(session['employeeid'])
+    return render_template("clock_land.html", wkpct = wkpct, yrpct = yrpct)
 
 
 @app.route("/clock")
 @login_required
 def clock():
-    clock_data = query_db()
+    clock_data = query_db(session['employeeid'])
     print('Quering DB', file=sys.stdout)
     return render_template("clock.html",clock_data=clock_data)
 
@@ -129,12 +137,10 @@ def clock():
 def clocktable():
     query_dict = request.args.to_dict()
     app.logger.info(query_dict)
+    app.logger.info(request.method)
     if request.method == 'GET':
         ckid = request.args.get('ckid', None)
-        session['ckid'] = ckid
-        clock, clock_det,clock_act,clock_tot  = query_clockwkdata(ckid)
-        app.logger.info("fetched Clockdetails for ID"+ str(ckid))
-        return render_template("clock_table.html",clock=clock,clock_det=clock_det,clock_act=clock_act,clock_tot=clock_tot)
+        session['ckid'] = ckid if ckid else session['ckid']
     if request.method == 'POST':
         ckid = session['ckid']
         app.logger.info(ckid)
@@ -146,6 +152,9 @@ def clocktable():
         clock_list = [l_info[i:i+chunk_size] for i in range(0, len(l_info), chunk_size)]
         app.logger.info(clock_list)
         insert_clock(ckid,clock_list)
+    clock, clock_det,clock_act,clock_tot  = query_clockwkdata(session['ckid'])
+    app.logger.info("fetched Clockdetails for ID"+ str(session['ckid']))
+    return render_template("clock_table.html",clock=clock,clock_det=clock_det,clock_act=clock_act,clock_tot=clock_tot)
 
 @app.route("/clockfaq")
 def clockfaq():
@@ -191,6 +200,10 @@ def valid_login(uname, paswd):
     logging.info("Hello in login")
     c.execute(f"""select user_name, concat(surname,' , ',given_name) fullname,email,employee_id from emp.employee where user_name = '{uname}'""")
     user_det = c.fetchall() 
+    c.execute(f"""SELECT clock_id from clk.clock where week_id = concat('wk',SUBSTR(YEARWEEK(SYSDATE()),3,2),'_',SUBSTR(YEARWEEK(SYSDATE()),5))and employee_id = {user_det[0][3]}""")
+    wk_id = c.fetchall()
+    c.execute(f"""select count(1) from emp.emp_app_roles r where role_name in ('AP101_ADMIN','AP101_USER')""")
+    r_id = c.fetchall()
     c.close()
     conn.close()
     app.logger.info(user_det)   
@@ -203,8 +216,13 @@ def valid_login(uname, paswd):
         session['fullname'] = user_det[0][1]
         session['email'] = user_det[0][2]
         session['employeeid'] = user_det[0][3]
+        session['ckid'] = wk_id[0][0]
+        app.logger.info(wk_id[0][0])
+        if not len(r_id):
+            return "Clock not enabled for user!"
     else:
         return "Invalid Username."
+    
 
 
 def forgot_pwd_nextstep(uname, ecode):
@@ -285,17 +303,31 @@ def update_cognito_db(uname,checks,check_msg):
     c.close()
     conn.close()
 
-def query_db():
+def query_db(empid):
     conn,c = mysql_conn()
     logging.info("Hello in query_db")
-    c.execute(f"""select  (@row_number:=@row_number + 1) AS a,week_id,start_date,end_date,hours_clocked,status,clock_id from clock,(SELECT @row_number:=0) AS temp order by start_date desc""")
+    c.execute(f"""select  (@row_number:=@row_number + 1) AS a,week_id,start_date,end_date,hours_clocked,status,clock_id from clock,(SELECT @row_number:=0) AS temp where clock.employee_id = {empid} order by start_date desc""")
     clock_det = c.fetchall()
     app.logger.info(clock_det)
     c.close()
     conn.close()
     return clock_det
 
-
+def query_clk_stats(empid):
+    conn,c = mysql_conn()
+    logging.info("Hello in query_clock stats")
+    c.execute(f"""SELECT clock_id from clk.clock where week_id = concat('wk',SUBSTR(YEARWEEK(SYSDATE()),3,2),'_',SUBSTR(YEARWEEK(SYSDATE()),5))and employee_id = {empid}""")
+    wk_id = c.fetchall()
+    ckid = wk_id[0][0]
+    c.execute(f"""select round((IFNULL((hours_clocked),0)/45) *100,2) from clock where clock_id = {ckid} and employee_id = {empid}""")
+    wkpct = c.fetchall()
+    app.logger.info(wkpct)
+    c.execute(f"""select round(((tot/(cnt*45))*100),2) from(select sum(IFNULL((hours_clocked),0)) tot,count(1) AS cnt from clock where ((YEAR(CURRENT_DATE()) = YEAR(start_date)) OR (YEAR(CURRENT_DATE()) = YEAR(end_date))) and employee_id = {empid}) a""")
+    yrpct = c.fetchall()
+    app.logger.info(yrpct)
+    c.close()
+    conn.close()
+    return wkpct[0][0],yrpct[0][0]
 
 def query_emp_act_db(empid):
     conn,c = mysql_conn()
@@ -351,7 +383,11 @@ def insert_clock(ckid,clock_data):
         clock_act = dict(clock_act)
         app.logger.info(clock_act)
         app.logger.info(request.query_string)
-        app.logger.info('Hello')    
+        app.logger.info('Hello')
+        tot_hrs = 0   
+        sqlquery = f""" Delete  from  clock_details where clock_id = {ckid}"""
+        app.logger.info(sqlquery)
+        c.execute(sqlquery) 
         for cnt,clock_dat in enumerate(clock_data):
             if cnt == len(clock_data)-1:
                 continue
@@ -360,13 +396,14 @@ def insert_clock(ckid,clock_data):
             clock_dat[0] = clock_act.get(clock_dat[0])
             clock_dat.insert(0,ckid)
             app.logger.info(clock_dat)
-            sqlquery = f""" Delete  from  clock_details where clock_id = {ckid}"""
-            app.logger.info(sqlquery)
-            c.execute(sqlquery)
             sqlquery = f""" Insert into clock_details (clock_id ,activity_id , day1,day2,day3,day4,day5, day6,day7) values 
                        {tuple(clock_dat)}"""
             app.logger.info(sqlquery)
             c.execute(sqlquery)
+            tot_hrs += sum([int(i) for i in list(tuple(clock_dat))][2:])
+        sqlquery = f""" Update clock set hours_clocked = {tot_hrs},submitted_date = date(sysdate()),status = 'Submitted',update_ts = CURRENT_TIMESTAMP() where clock_id = {ckid}"""
+        app.logger.info(sqlquery)
+        c.execute(sqlquery)
         c.close()
         conn.commit()
         conn.close()

@@ -31,7 +31,7 @@ function post_form()
     if (status === 0 || (status >= 200 && status < 400)) {
       // The request has been completed successfully
      console.log(xhr.responseText);
-     element.insertAdjacentHTML('beforeend', '<div class="alert alert-primary">Please submmit with <strong>email verification Code</strong> and <strong>Reset password</strong> details.</div>');
+     element.insertAdjacentHTML('beforeend', '<div class="alert alert-primary">Please submmit <strong>email verification Code</strong>.</div>');
     } else {
       // Oh no! There has been an error with the request!
     }

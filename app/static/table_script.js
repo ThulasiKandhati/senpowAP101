@@ -106,7 +106,7 @@ function add_row()
  var table_len = Number(reset_tot('NEW'))+1;
  console.log(start_t)
 console.log('Adding Row'+table_len)
-var row = table.insertRow((table.rows.length)-2).outerHTML="<tr id='row"+table_len+"'><td id='activity"+table_len+"'>"+new_activity+"</td><td id='start"+table_len+"'>"+new_start+"</td><td id='start1"+table_len+"'>"+new_start1+"</td><td id='start2"+table_len+"'>"+new_start2+"</td><td id='start3"+table_len+"'>"+new_start3+"</td><td id='start4"+table_len+"'>"+new_start4+"</td><td id='start5"+table_len+"'>"+new_start5+"</td><td id='end"+table_len+"'>"+new_end+"</td><td><input type='button' id='edit_button"+table_len+"' value='Edit' class='btn btn-dark' onclick='edit_row("+table_len+")'> <input type='button' id='save_button"+table_len+"' value='Save' class='btn btn-dark' onclick='save_row("+table_len+")' disabled> <input type='button' value='Delete' class='btn btn-dark' onclick='delete_row("+table_len+")'></td></tr>";
+var row = table.insertRow((table.rows.length)-2).outerHTML="<tr id='row"+table_len+"'><td id='activity"+table_len+"'>"+new_activity+"</td><td id='start"+table_len+"'>"+new_start+"</td><td id='start1"+table_len+"'>"+new_start1+"</td><td id='start2"+table_len+"'>"+new_start2+"</td><td id='start3"+table_len+"'>"+new_start3+"</td><td id='start4"+table_len+"'>"+new_start4+"</td><td id='start5"+table_len+"'>"+new_start5+"</td><td id='end"+table_len+"'>"+new_end+"</td><td><input type='button' id='edit_button"+table_len+"' value='Edit' class='btn btn-dark' onclick='edit_row("+table_len+")'> <input type='button' id='save_button"+table_len+"' value='Done' class='btn btn-dark' onclick='save_row("+table_len+")' disabled> <input type='button' value='Delete' class='btn btn-dark' onclick='delete_row("+table_len+")'></td></tr>";
  //adding new balnk row
  document.getElementById("new_activity").value="Select Activity";
  document.getElementById("new_start").value="0";
@@ -129,6 +129,7 @@ function clear_alerts()
 function save()
 {
   clear_alerts()
+  console.log('calling save validate')
   if (save_validate() == true)
    {
      return true
@@ -138,13 +139,14 @@ function save()
   var a_msg = "";
   var g_t =  document.getElementById("c_grandtot").innerHTML
   var g_tot = Number(g_t.substr(9))
+  console.log('g_tot'+g_tot);
   if (g_tot < 40)
   {
-    e_msg = "Minimum 40 hrs to be clocked."
+    e_msg += "Minimum 40 hrs to be clocked."
   }
   if (g_tot > 80)
   {
-   e_msg = "Maximum 80 hrs to be clocked."
+   e_msg += "Maximum 80 hrs to be clocked."
   }
   if (g_tot > 40)
    {
@@ -154,6 +156,7 @@ function save()
    {
     a_msg += " Clocking on weekends."
    }
+   console.log('e_msg'+e_msg);
    if (e_msg != ""){
      alert_display(e_msg)
      return true
@@ -241,7 +244,7 @@ function alert_display(e_msg)
 }
 function save_validate()
 {
-  const sta = ''
+  var sta = ''
   var table=document.getElementById("tblClock");
   var table_len= get_tab_len();
   for (i = 1; i < table_len; i++) {
@@ -249,11 +252,12 @@ function save_validate()
     try{
         sta = document.getElementById("save_button"+i).getAttribute("disabled")
        }
-     catch(err) {continue}
+     catch(err) {
+      continue}
       if (sta == null)
       {
        console.log('Edit line is active')
-       alert_display('Save the edited line')
+       alert_display('Complete the edit enabled line')
        return true;
       }
      }
