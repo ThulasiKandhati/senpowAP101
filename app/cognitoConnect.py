@@ -37,15 +37,15 @@ def send_plain_email(subj, bod):
 def reset_pass(usernam):
     pass1 = ''.join(random.choices(string.ascii_lowercase +
                     string.digits, k=4))
-    password = username+pass1
+    pass1 = usernam+'@'+pass1
     response = client.admin_set_user_password(
     UserPoolId=os.getenv('COGNITO_USERPOOL_NAME'),
     Username=usernam,
-    Password=pas,
+    Password=pass1,
     Permanent=True
     )
     if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-        send_plain_email("Senthur Power App Password Reset",f"User Name: {username} and password: {password}")
+        send_plain_email("Senthur Power App Password Reset",f"User Name: {usernam} and password: {pass1}")
 
 def sign_up(username, c_msg, check0, check1, check2, check3, check4):
     ret_msg = ''
