@@ -152,7 +152,8 @@ def clocktable():
         clock_list = [l_info[i:i+chunk_size] for i in range(0, len(l_info), chunk_size)]
         app.logger.info(clock_list)
         insert_clock(ckid,clock_list)
-    clock, clock_det,clock_act,clock_tot  = query_clockwkdata(session['ckid'])
+    clock_act = get_clock_activity(g.user.employeeid)
+    clock, clock_det,clock_tot  = query_clockwkdata(session['ckid'])
     app.logger.info("fetched Clockdetails for ID"+ str(session['ckid']))
     return render_template("clock_table.html",clock=clock,clock_det=clock_det,clock_act=clock_act,clock_tot=clock_tot)
 
@@ -200,6 +201,7 @@ def valid_login(uname, paswd):
     logging.info("Hello in login")
     c.execute(f"""select user_name, concat(surname,' , ',given_name) fullname,email,employee_id from emp.employee where user_name = '{uname}'""")
     user_det = c.fetchall() 
+    app.logger.info(user_det[0][3])
     c.execute(f"""SELECT clock_id from clk.clock where week_id = concat('wk',SUBSTR(YEARWEEK(SYSDATE()),3,2),'_',SUBSTR(YEARWEEK(SYSDATE()),5))and employee_id = {user_det[0][3]}""")
     wk_id = c.fetchall()
     c.execute(f"""select count(1) from emp.emp_app_roles r where role_name in ('AP101_ADMIN','AP101_USER')""")
@@ -332,7 +334,7 @@ def query_clk_stats(empid):
 def query_emp_act_db(empid):
     conn,c = mysql_conn()
     logging.info("Hello in employee activity db")
-    c.execute(f"""select p.project_name,t.description,a.activity_code,a.start_date,a.end_date  from clock_activity a, prj.projects p,prj.project_task t where employee_id ={empid} and t.task_id = a.task_id and t.project_id = p.project_id""")
+    c.execute(f"""select p.project_name,t.description,a.activity_code,a.activity_desc,a.start_date,a.end_date  from clock_activity a, prj.projects p,prj.project_task t where employee_id ={empid} and t.task_id = a.task_id and t.project_id = p.project_id""")
     clock_act = c.fetchall()
     app.logger.info(clock_act)
     c.close()
@@ -347,19 +349,18 @@ def query_clockwkdata(ckid):
     app.logger.info('Fetched Details')
     c.execute(f"""select c.activity_id , c.day1,c.day2,c.day3,c.day4,c.day5,c.day6,c.day7,c.seq_no,a.activity_code from clock_details c,clock_activity a where clock_id = {ckid} and c.activity_id = a.activity_id order by seq_no """)
     clock_det = c.fetchall()
-    clock_act = get_clock_activity()
     app.logger.info('Fetched Activity details')
     c.execute(f"""select IFNULL(day1,0),IFNULL(day2,0),IFNULL(day3,0),IFNULL(day4,0),IFNULL(day5,0),IFNULL(day6,0),IFNULL(day7,0),CONCAT('Week Tot:',IFNULL((day1+day2+day3+day4+day5+day6+day7),0)) tot from (select  sum(IFNULL(c.day1,0)) day1,sum(IFNULL(c.day2,0)) day2,sum(IFNULL(c.day3,0)) day3,sum(IFNULL(c.day4,0)) day4,sum(IFNULL(c.day5,0)) day5,sum(IFNULL(c.day6,0)) day6,sum(IFNULL(c.day7,0)) day7 from clock_details c where clock_id = {ckid})d """)
     clock_tot = c.fetchall()
     app.logger.info('Fetched Activity details')
     c.close()
     conn.close()
-    return clock, clock_det, clock_act, clock_tot
+    return clock, clock_det, clock_tot
 
 
-def get_clock_activity():
+def get_clock_activity(empid):
     conn,c = mysql_conn()
-    c.execute(f"""select  activity_code,activity_id from clock_activity """)
+    c.execute(f"""select  activity_code,activity_id from clock_activity where employee_id ={empid}""")
     clock_act = c.fetchall()
     c.close()
     conn.close()
@@ -379,7 +380,7 @@ def insert_db(clock_act):
 def insert_clock(ckid,clock_data):
     try:
         conn,c = mysql_conn()
-        clock_act = get_clock_activity()
+        clock_act = get_clock_activity(g.user.employeeid)
         clock_act = dict(clock_act)
         app.logger.info(clock_act)
         app.logger.info(request.query_string)
