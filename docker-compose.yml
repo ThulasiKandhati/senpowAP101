@@ -14,4 +14,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
     volumes:
+      - mysqldb:/tmp/clockdb
       - ./db:/docker-entrypoint-initdb.d/:ro
+volumes:
+  mysqldb:
