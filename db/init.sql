@@ -101,7 +101,8 @@ insert into clock_activity(activity_code,activity_desc,start_date ,end_date ,emp
 
 insert into clock(week_id, employee_id, start_date,start_date_plus1,start_date_plus2 ,start_date_plus3 ,start_date_plus4 ,start_date_plus5,end_date, hours_clocked ,status,submitted_date)values ('wk22_02',1,'2022-01-03','2022-01-04','2022-01-05','2022-01-06','2022-01-07','2022-01-08','2022-01-09',0,'Submitted',CURRENT_DATE),('wk22_03',1,'2022-01-10','2022-01-11','2022-01-12','2022-01-13','2022-01-14','2022-01-15','2022-01-16',0,'Submitted',CURRENT_DATE),('wk22_04',1,'2022-01-17','2022-01-18','2022-01-19','2022-01-20','2022-01-21','2022-01-22','2022-01-23',0,'Submitted',CURRENT_DATE);
 */
-DELIMITER &&  
+
+DELIMITER &&;  
 CREATE PROCEDURE get_clock_exists (INOUT var1 INTEGER,OUT var2 VARCHAR(100) )  
 BEGIN 
       SELECT concat('wk',SUBSTR(YEARWEEK(SYSDATE()),3,2),'_',SUBSTR(YEARWEEK(SYSDATE()),5)) INTO var2;
@@ -111,7 +112,7 @@ BEGIN
 END &&  
 DELIMITER ;
 
-DELIMITER &&  
+DELIMITER &&;  
 CREATE PROCEDURE insert_clock ( INOUT var1 INTEGER,IN var2  VARCHAR(100))  
 BEGIN  
   DECLARE finished INTEGER DEFAULT 0;
@@ -149,7 +150,7 @@ END &&
 DELIMITER ;   
 
 
-DELIMITER &&
+DELIMITER &&;
 CREATE PROCEDURE insert_clock_past ( INOUT var1 INTEGER,IN var3 DATE)
 BEGIN
   DECLARE finished INTEGER DEFAULT 0;
@@ -188,7 +189,7 @@ END &&
 DELIMITER ;
 
 
-
+/*
 set @wk =null;
 set @empid =null;
 CALL get_clock_exists(@empid, @wk);  
@@ -204,5 +205,6 @@ SELECT @M;
 SET @M = null;
 CALL insert_clock_past(@M,SYSDATE());
 SELECT @M;
+*/
 
 select * from clock;
