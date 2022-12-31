@@ -101,16 +101,17 @@ def signup():
     app.logger.info('in signup app.py')
     if request.method == 'POST':
         uname = request.form['unameser'];
+        email=get_email_uname(uname)
         if request.form.get('submit_button') ==  "Create User":
             app.logger.info("Create user")
             sign_dat = signup_query(uname)
-            checks, check_msg, check_debug = cognitoConnect.sign_up(uname, sign_dat[0][3], sign_dat[0][4], sign_dat[0][5], sign_dat[0][6], sign_dat[0][7], sign_dat[0][8])
+            checks, check_msg, check_debug = cognitoConnect.sign_up(uname, email, sign_dat[0][3], sign_dat[0][4], sign_dat[0][5], sign_dat[0][6], sign_dat[0][7], sign_dat[0][8])
             app.logger.info(f"Debug {check_debug}")
             app.logger.info(f"updating user {uname}")
             update_cognito_db(uname,checks,check_msg)
         if request.form.get('submit_button') == "Reset Password":
             app.logger.info("Reset Password")
-            cognitoConnect.reset_pass(uname)
+            cognitoConnect.reset_pass(uname,email)
     if uname:
         app.logger.info(f"Fetching the page ap101_usercognito.html")
         sign_dat = signup_query(uname)
@@ -121,7 +122,8 @@ def signup():
 @login_required
 def clockland():
     wkpct,yrpct = query_clk_stats(session['employeeid'])
-    return render_template("clock_land.html", wkpct = wkpct, yrpct = yrpct)
+    emp_def = query_emp_defaulter(session['employeeid'])
+    return render_template("clock_land.html", wkpct = wkpct, yrpct = yrpct,emp_def = emp_def)
 
 
 @app.route("/clock")
@@ -135,6 +137,7 @@ def clock():
 @app.route("/clocktable",  methods=['GET','POST'])
 @login_required
 def clocktable():
+    import json
     query_dict = request.args.to_dict()
     app.logger.info(query_dict)
     app.logger.info(request.method)
@@ -145,13 +148,15 @@ def clocktable():
         ckid = session['ckid']
         app.logger.info(ckid)
         information = request.data
-        app.logger.info(request.method)
-        app.logger.info(type(information))
-        l_info = (information.decode("utf-8")).split(',')
-        chunk_size = 8
-        clock_list = [l_info[i:i+chunk_size] for i in range(0, len(l_info), chunk_size)]
-        app.logger.info(clock_list)
-        insert_clock(ckid,clock_list)
+        information = information.decode("utf-8")
+        information = json.loads(information)
+        app.logger.info(information)
+        l_info = (information['tab_data'])
+        l_action = (information['action'])
+        app.logger.info(l_info)
+        #chunk_size = 8
+        #clock_list = [l_info[i:i+chunk_size] for i in range(0, len(l_info), chunk_size)][0]
+        insert_clock(ckid,l_info,l_action)
     clock_act = get_clock_activity(g.user.employeeid)
     clock, clock_det,clock_tot  = query_clockwkdata(session['ckid'])
     app.logger.info("fetched Clockdetails for ID"+ str(session['ckid']))
@@ -196,6 +201,17 @@ def mysql_conn():
         print("exception",e)
 
 
+def get_email_uname(uname):
+    conn,c = mysql_conn()
+    logging.info("Hello in login")
+    c.execute(f"""select ifnull(email,'cpathi@senthurpower.com') from emp.employee where user_name = '{uname}'""")
+    user_det = c.fetchall()
+    email = user_det[0][0]
+    c.close()
+    conn.close()
+    return email
+
+
 def valid_login(uname, paswd):
     conn,c = mysql_conn()
     logging.info("Hello in login")
@@ -230,6 +246,7 @@ def valid_login(uname, paswd):
 def forgot_pwd_nextstep(uname, ecode):
     try:
         e_msg =  p_msg =  s_msg = ''
+        email=get_email_uname(uname)
         if not ecode:
             response = cognitoConnect.forgot_password(uname)
             app.logger.info(response)
@@ -239,7 +256,7 @@ def forgot_pwd_nextstep(uname, ecode):
             else:
                 p_msg = forgot_msg_dict.get(2)
         else:
-            response = cognitoConnect.confirm_forgot_password(uname, ecode)
+            response = cognitoConnect.confirm_forgot_password(uname, email, ecode)
             app.logger.info(response)
             if str(response).find("ERR_INVALID_CNFFORGPASS") != -1:
                 e_msg = "Invalid details.Password not set"
@@ -341,6 +358,16 @@ def query_emp_act_db(empid):
     conn.close()
     return clock_act
 
+def query_emp_defaulter(empid):
+    conn,c = mysql_conn()
+    logging.info("Hello in employee defaulters")
+    c.execute(f""" select concat(e.surname,e.given_name) full_name,week_id,hours_clocked,status from clk.clock c,emp.employee e,emp.employee m where e.employee_id = c.employee_id and e.manager_id = m.employee_id and m.employee_id ={empid} and c.status != 'Submitted'  order by 1,2""")
+    clock_act = c.fetchall()
+    app.logger.info(clock_act)
+    c.close()
+    conn.close()
+    return clock_act
+
 def query_clockwkdata(ckid):
     logging.info("Hello in query_db")
     conn,c = mysql_conn()
@@ -377,14 +404,12 @@ def insert_db(clock_act):
     conn.close()
     return clock_det
 
-def insert_clock(ckid,clock_data):
+def insert_clock(ckid,clock_data,action):
     try:
         conn,c = mysql_conn()
         clock_act = get_clock_activity(g.user.employeeid)
         clock_act = dict(clock_act)
-        app.logger.info(clock_act)
-        app.logger.info(request.query_string)
-        app.logger.info('Hello')
+        app.logger.info(clock_data)
         tot_hrs = 0   
         sqlquery = f""" Delete  from  clock_details where clock_id = {ckid}"""
         app.logger.info(sqlquery)
@@ -392,17 +417,14 @@ def insert_clock(ckid,clock_data):
         for cnt,clock_dat in enumerate(clock_data):
             if cnt == len(clock_data)-1:
                 continue
-            
-            app.logger.info(clock_act.get(clock_dat[0]))
             clock_dat[0] = clock_act.get(clock_dat[0])
             clock_dat.insert(0,ckid)
-            app.logger.info(clock_dat)
             sqlquery = f""" Insert into clock_details (clock_id ,activity_id , day1,day2,day3,day4,day5, day6,day7) values 
                        {tuple(clock_dat)}"""
             app.logger.info(sqlquery)
             c.execute(sqlquery)
             tot_hrs += sum([int(i) for i in list(tuple(clock_dat))][2:])
-        sqlquery = f""" Update clock set hours_clocked = {tot_hrs},submitted_date = date(sysdate()),status = 'Submitted',update_ts = CURRENT_TIMESTAMP() where clock_id = {ckid}"""
+        sqlquery = f""" Update clock set hours_clocked = {tot_hrs},submitted_date = date(sysdate()),status = '{action}',update_ts = CURRENT_TIMESTAMP() where clock_id = {ckid}"""
         app.logger.info(sqlquery)
         c.execute(sqlquery)
         c.close()

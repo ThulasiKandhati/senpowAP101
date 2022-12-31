@@ -48,7 +48,29 @@
           </div>
         </div>
       </div>
-    </div>  
+    </div> 
+
+ <table id="tblEmpdef" class="table table-striped" align='center' cellspacing=2 cellpadding=5  border=1>
+	 <caption>Clock Defaulter Reportees.</caption>
+<thead>
+    <tr>
+      <th scope="name">Employee Name</th>
+      <th scope="week">WeekID</th>
+      <th scope="hours">Clocked</th>
+      <th scope="Status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for clock in emp_def %}
+    <tr>
+      <td>{{ clock[0] }}</td>
+      <td>{{ clock[1] }}</td>
+      <td>{{ clock[2] }}</td>
+      <td>{{ clock[3] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
 {% block finalscript %}
  <script>

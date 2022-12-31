@@ -126,7 +126,20 @@ function clear_alerts()
   return element;
 }
 
+function save1()
+{
+  clear_alerts()
+  console.log('calling save validate')
+  if (save_validate() == true)
+   {
+     return true
+   }
+    if (post_form('Saved') == true)
+    {alert_display(null)}
+}
+
 function save()
+//submmit code
 {
   clear_alerts()
   console.log('calling save validate')
@@ -140,21 +153,21 @@ function save()
   var g_t =  document.getElementById("c_grandtot").innerHTML
   var g_tot = Number(g_t.substr(9))
   console.log('g_tot'+g_tot);
-  if (g_tot < 40)
+  if (g_tot < 48)
   {
-    e_msg += "Minimum 40 hrs to be clocked."
+    e_msg += "Minimum 48 hrs to be clocked."
   }
   if (g_tot > 80)
   {
    e_msg += "Maximum 80 hrs to be clocked."
   }
-  if (g_tot > 40)
+  if (g_tot > 48)
    {
-    a_msg += "Clocking More than 40 hours."
+    a_msg += "Clocking More than 48 hours."
    }
-  if ((Number(document.getElementById("start5_tot").innerHTML) + Number(document.getElementById("end_tot").innerHTML)) > 0)
+  if ( (Number(document.getElementById("end_tot").innerHTML)) > 0)
    {
-    a_msg += " Clocking on weekends."
+    a_msg += " Clocking on Sunday."
    }
    console.log('e_msg'+e_msg);
    if (e_msg != ""){
@@ -167,7 +180,7 @@ function save()
      dialog.show();
      return true
    }
-    if (post_form() == true)
+    if (post_form('Submitted') == true)
     {alert_display(null)}
 }
 
@@ -269,7 +282,7 @@ function alrt_continue()
   var dialog = document.getElementById('dialog_alrt');
   dialog.close();
   console.log('alrt_cnt1')
-  if (post_form() == true)
+  if (post_form('Submitted') == true)
     {alert_display(null)}
 }
 
@@ -293,13 +306,16 @@ function get_tab_len()
 }
 
 
-function post_form()
+function post_form(act)
 {
   const URL = '/clocktable'
   const xhr = new XMLHttpRequest();
   sender = tableToJson()
   xhr.open('POST', URL);
-  xhr.send(sender);
+  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  const obj = {"tab_data":sender , "action":act};
+  console.log(obj)
+  xhr.send(JSON.stringify(obj));
 return true
 }
 

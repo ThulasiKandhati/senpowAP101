@@ -7,7 +7,7 @@ import string
 
 client = boto3.client('cognito-idp', region_name=os.getenv('COGNITO_REGION_NAME'),aws_access_key_id=os.getenv('ACCESS_KEY_ID'),
          aws_secret_access_key=os.getenv('SECRET_ACCESS_KEY'))
-def send_plain_email(subj, bod):
+def send_plain_email(subj, bod, to_email):
     ses_client = boto3.client("ses", region_name=os.getenv('COGNITO_REGION_NAME'),aws_access_key_id=os.getenv('ACCESS_KEY_ID'),
          aws_secret_access_key=os.getenv('SECRET_ACCESS_KEY'))
     CHARSET = "UTF-8"
@@ -15,7 +15,7 @@ def send_plain_email(subj, bod):
     response = ses_client.send_email(
         Destination={
             "ToAddresses": [
-                "kthulasikumar@gmail.com",
+               "kthulasikumar@gmail.com",# to_email,
             ],
         },
         Message={
@@ -34,7 +34,7 @@ def send_plain_email(subj, bod):
     )
 
 
-def reset_pass(usernam):
+def reset_pass(usernam, email):
     pass1 = ''.join(random.choices(string.ascii_lowercase +
                     string.digits, k=4))
     pass1 = usernam+'@'+pass1
@@ -45,9 +45,9 @@ def reset_pass(usernam):
     Permanent=True
     )
     if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-        send_plain_email("Senthur Power App Password Reset",f"User Name: {usernam} and password: {pass1}")
+        send_plain_email("Senthur Power App Password Reset",f"User Name: {usernam} and password: {pass1}" ,email)
 
-def sign_up(username, c_msg, check0, check1, check2, check3, check4):
+def sign_up(username, email, c_msg, check0, check1, check2, check3, check4):
     ret_msg = ''
     ret_val = ['N','N','N']
     r_debug =""
@@ -63,7 +63,7 @@ def sign_up(username, c_msg, check0, check1, check2, check3, check4):
                 ClientId=os.getenv('COGNITO_USER_CLIENT_ID'),
                 Username=username,
                 Password=password,
-                UserAttributes=[{'Name': 'email','Value': 'kthulasikumar@gmail.com'}]
+                UserAttributes=[{'Name': 'email','Value': email}]
             )
             
             if response['ResponseMetadata']['HTTPStatusCode'] == 200:
@@ -119,7 +119,7 @@ def sign_up(username, c_msg, check0, check1, check2, check3, check4):
             if response['ResponseMetadata']['HTTPStatusCode'] == 200:
                 ret_msg += ' AP101_ADMIN added.'
         r_debug += "All CHecks Done~"
-        send_plain_email("Senthur Power App user Created",f"User Name: {username} and password: {password}") 
+        send_plain_email("Senthur Power App user Created",f"User Name: {username} and password: {password}", email) 
         return ret_val, ret_msg, r_debug
     except Exception as e:
         print(str(e)[:150])
@@ -154,7 +154,7 @@ def forgot_password(username):
 
 
 
-def confirm_forgot_password(username, confirm_code):
+def confirm_forgot_password(username, email, confirm_code):
     try:
         pass1 = ''.join(random.choices(string.ascii_lowercase +
                              string.digits, k=4))
@@ -165,7 +165,7 @@ def confirm_forgot_password(username, confirm_code):
                ConfirmationCode=confirm_code,
                Password=password
         )
-        send_plain_email("Senthur Power App user Created",f"User Name: {username} and password: {password}")
+        send_plain_email("Senthur Power App user Created",f"User Name: {username} and password: {password}",email)
         return response
     except Exception as e:
         return 'ERR_INVALID_CNFFORGPASS' + str(e)[:75]
